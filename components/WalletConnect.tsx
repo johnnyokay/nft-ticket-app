@@ -68,7 +68,7 @@ export default function WalletConnect() {
         <chakra.div>
           <Flex direction="row" justifyContent="center" alignItems="center">
             {connectedNetwork !== "" ? 
-              <chakra.p mr="5" fontWeight="thin">
+              <chakra.p mr="5" fontWeight="light" colorScheme="teal">
               {"network: " + connectedNetwork}
             </chakra.p>
             :

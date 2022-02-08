@@ -49,7 +49,7 @@ const nfts = () => {
               const signer = provider.getSigner();
 
               const contract = new ethers.Contract(
-                "0x436381336ff352c44036c970601361d37228761a",
+                "0xf0d755b10b0b1b5c96d00d84152385f9fd140739",
                 abi,
                 signer
               );
