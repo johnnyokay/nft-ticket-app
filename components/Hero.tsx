@@ -30,38 +30,17 @@ export default function Hero() {
   const [walletAddress, setWalletAddress] = useState("")
 
   const mintNft = async () => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
+    // const provider = new ethers.providers.Web3Provider(window.ethereum);
+    // const signer = provider.getSigner();
 
-    const contract = new ethers.Contract(
-        "0xf0d755b10b0b1b5c96d00d84152385f9fd140739",
-        abi,
-        signer
-    );
+    // const contract = new ethers.Contract(
+    //     "0xf0d755b10b0b1b5c96d00d84152385f9fd140739",
+    //     abi,
+    //     signer
+    // );
 
-    await contract.safeMint(walletAddress)
+    // await contract.safeMint(walletAddress)
   }
-
-  useEffect(() => {
-    // Client-side-only code
-    async function initWeb3() {
-      if (typeof window.ethereum !== "undefined" || (typeof window.web3 !== "undefined")) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum,"any");
-        const signer = provider.getSigner();
-
-        try {
-          const addr = await signer.getAddress().then(async (a: string) => {
-            if (addr !== null) {
-              setWalletAddress(a)
-            }
-          })
-        } catch(error) {
-          console.log(error)
-        }
-      }
-    }
-    initWeb3();
-  }, [])
 
   return (
     <>
