@@ -1,154 +1,138 @@
-import React from "react";
+import React from 'react';
 import {
-  chakra,
-  Flex,
-  HStack,
-  Icon,
-  IconButton,
-  Link,
-  useColorMode,
-  useColorModeValue,
-  useDisclosure,
-  CloseButton,
-  Box,
-  VStack,
+  createStyles,
+  Menu,
+  Center,
+  Header,
+  Container,
+  Group,
   Button,
-} from "@chakra-ui/react";
-import { useViewportScroll } from "framer-motion";
-import { FaMoon, FaSun, FaHeart } from "react-icons/fa";
-import {
-  AiFillGithub,
-  AiOutlineMenu,
-  AiFillHome,
-  AiOutlineInbox,
-} from "react-icons/ai";
-import { BsFillCameraVideoFill } from "react-icons/bs";
-import WalletConnect from "./WalletConnect";
+  Burger,
+  Text,
+  Tooltip,
+  Title
+} from '@mantine/core';
+import { useBooleanToggle } from '@mantine/hooks';
+import { useUser } from '../hooks/useUser';
+import { useRouter } from 'next/router';
+// import { ChevronDown } from 'tabler-icons-react';
+// import { MantineLogo } from '../../shared/MantineLogo';
 
-const Navbar = () => {
-  const mobileNav = useDisclosure();
+const HEADER_HEIGHT = 60;
 
-  const { toggleColorMode: toggleMode } = useColorMode();
-  const text = useColorModeValue("dark", "light");
-  const SwitchIcon = useColorModeValue(FaMoon, FaSun);
+const useStyles = createStyles((theme) => ({
+  inner: {
+    height: HEADER_HEIGHT,
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
 
-  const bg = useColorModeValue("gray.200", "gray.700");
-  const ref = React.useRef();
-  const [y, setY] = React.useState(0);
-  const { height = 0 } = ref.current ? ref.current.getBoundingClientRect() : {};
+  links: {
+    [theme.fn.smallerThan('sm')]: {
+      display: 'none',
+    },
+  },
 
-  const { scrollY } = useViewportScroll();
-  React.useEffect(() => {
-    return scrollY.onChange(() => setY(scrollY.get()));
-  }, [scrollY]);
-  
-  const SponsorButton = (
-    <Box
-      ml={5}
-    >
-      <WalletConnect />
-    </Box>
-  );
-  const MobileNavContent = (
-    <VStack
-      pos="absolute"
-      top={0}
-      left={0}
-      right={0}
-      display={mobileNav.isOpen ? "flex" : "none"}
-      flexDirection="column"
-      p={2}
-      pb={4}
-      m={2}
-      bg={bg}
-      spacing={3}
-      rounded="sm"
-      shadow="sm"
-    >
-      <CloseButton
-        aria-label="Close menu"
-        justifySelf="self-start"
-        onClick={mobileNav.onClose}
-      />
-      <Button w="full" variant="ghost"  leftIcon={<AiFillHome />}>
-        Dashboard
-      </Button>
-      <Button
-        w="full"
-        variant="solid"
-        colorScheme="brand"
-        
-        leftIcon={<AiOutlineInbox />}
+  burger: {
+    [theme.fn.largerThan('sm')]: {
+      display: 'none',
+    },
+  },
+
+  link: {
+    display: 'block',
+    lineHeight: 1,
+    padding: '8px 12px',
+    borderRadius: theme.radius.sm,
+    textDecoration: 'none',
+    color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[7],
+    fontSize: theme.fontSizes.md,
+    fontWeight: 500,
+
+    '&:hover': {
+      backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[0],
+    },
+  },
+
+  linkLabel: {
+    marginRight: 5,
+  },
+}));
+
+const links = [
+  {"link": "buytickets", "label": "Buy Tickets"},
+  {"link": "mytickets", "label": "My Tickets"},
+  {"link": "eventlogs", "label": "Event logs"},
+]
+
+export default function Navbar() {
+  const { user, connectWeb3Modal, switchNetwork } = useUser()
+  const { classes } = useStyles();
+  const [opened, toggleOpened] = useBooleanToggle(false);
+  const router = useRouter()
+
+  const items = links.map((link) => {
+    return (
+      <a
+        key={link.label}
+        href={link.link}
+        className={classes.link}
+        onClick={() => router.push('/mytickets')}
       >
-        Inbox
-      </Button>
-      <Button
-        w="full"
-        variant="ghost"
-        
-        leftIcon={<BsFillCameraVideoFill />}
-      >
-        Videos
-      </Button>
-    </VStack>
-  );
+        {link.label}
+      </a>
+    );
+  });
+
   return (
-    <Box pos="relative">
-      <chakra.header
-        ref={ref}
-        shadow={y > height ? "sm" : undefined}
-        transition="box-shadow 0.2s"
-        bg={bg}
-        borderTopColor="brand.400"
-        w="full"
-        overflowY="hidden"
-      >
-        <chakra.div h="4.5rem" mx="auto" maxW="1200px">
-          <Flex w="full" h="full" px="6" align="center" justify="space-between">
-            <Flex align="center">
-              <Link href="/">
-                <HStack>
-                <chakra.h1 fontSize="xl" fontWeight="medium" ml="2">
-                    NFT Ticket Dapp
-                </chakra.h1>
-                </HStack>
-              </Link>
-            </Flex>
-
-            <Flex
-              justify="flex-end"
-              w="full"
-              maxW="824px"
-              align="center"
-              color="gray.400"
-            >
-              <IconButton
-                size="md"
-                fontSize="lg"
-                aria-label={`Switch to ${text} mode`}
-                variant="ghost"
-                color="current"
-                ml={{ base: "0", md: "3" }}
-                onClick={toggleMode}
-                icon={<SwitchIcon />}
-              />
-              {SponsorButton}
-              <IconButton
-                display={{ base: "flex", md: "none" }}
-                aria-label="Open menu"
-                fontSize="20px"
-                color={useColorModeValue("gray.800", "inherit")}
-                variant="ghost"
-                icon={<AiOutlineMenu />}
-                onClick={mobileNav.onOpen}
-              />
-            </Flex>
-          </Flex>
-          {MobileNavContent}
-        </chakra.div>
-      </chakra.header>
-    </Box>
+    <Header height={HEADER_HEIGHT} mb={120}>
+      <Container size="xl" className={classes.inner}>
+        <Group>
+          <Burger
+            opened={opened}
+            onClick={() => toggleOpened()}
+            className={classes.burger}
+            size="sm"
+          />
+          {/* <MantineLogo /> */}
+          <Title onClick={() => router.push('/')} order={3} >
+            Event X
+          </Title>
+        </Group>
+        <Group spacing={5} className={classes.links}>
+          {items}
+        </Group>
+        <Group>
+          {user.network == "maticmum" ? 
+          <Tooltip
+          transition="fade"
+          transitionDuration={200}
+          label="Connected to Mumbai Network"
+          withArrow
+        >
+          <Text size='md' >
+              Mumbai
+            </Text>
+        </Tooltip>
+            
+              :
+            
+            <Tooltip
+            opened
+            label="Click to switch to Mumbai Network"
+            withArrow
+          >
+            <Button variant="outline" size='sm' color='red' sx={{ height: 30 }} onClick={switchNetwork}>
+              Unsupported Network!
+            </Button>
+          </Tooltip>
+          }
+          <Button size='md' sx={{ height: 35 }} onClick={connectWeb3Modal}>
+            {user.displayName}
+          </Button>
+        </Group>
+      </Container>
+    </Header>
   );
-};
-
-export default Navbar;
+}

@@ -1,118 +1,124 @@
-import Head from 'next/head';
-import {
-  Box,
-  Heading,
-  Container,
-  Text,
-  Button,
-  Stack,
-  Icon,
-  useColorModeValue,
-  createIcon,
-} from '@chakra-ui/react';
-import { useRouter } from 'next/router';
-import { ethers } from 'ethers';
-import { useEffect, useState } from 'react';
+import React from 'react';
+import { createStyles, Title, Text, Button, Container, useMantineTheme } from '@mantine/core';
+import { Dots } from './Dots';
 
-const abi = [
-  // ERC-721
-  "function tokenURI(uint256 _tokenId) external view returns (string)",
-  "function ownerOf(uint256 _tokenId) external view returns (address)",
-  // ERC-1155
-  "function uri(uint256 _id) external view returns (string)",
-  "event OwnershipApprovalRequest(address ownerAddress, uint256 tokenId, uint16 secret)",
-  "function safeMint(address to) public onlyOwner"
-]
+const useStyles = createStyles((theme) => ({
+  wrapper: {
+    position: 'relative',
+    paddingTop: 120,
+    paddingBottom: 80,
+
+    '@media (max-width: 755px)': {
+      paddingTop: 80,
+      paddingBottom: 60,
+    },
+  },
+
+  inner: {
+    position: 'relative',
+    zIndex: 1,
+  },
+
+  dots: {
+    position: 'absolute',
+    color: theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[1],
+
+    '@media (max-width: 755px)': {
+      display: 'none',
+    },
+  },
+
+  dotsLeft: {
+    left: 0,
+    top: 0,
+  },
+
+  title: {
+    textAlign: 'center',
+    fontWeight: 800,
+    fontSize: 40,
+    letterSpacing: -1,
+    color: theme.colorScheme === 'dark' ? theme.white : theme.black,
+    marginBottom: theme.spacing.xs,
+    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+
+    '@media (max-width: 520px)': {
+      fontSize: 28,
+      textAlign: 'left',
+    },
+  },
+
+  description: {
+    textAlign: 'center',
+
+    '@media (max-width: 520px)': {
+      textAlign: 'left',
+      fontSize: theme.fontSizes.md,
+    },
+  },
+
+  controls: {
+    marginTop: theme.spacing.lg,
+    display: 'flex',
+    justifyContent: 'center',
+
+    '@media (max-width: 520px)': {
+      flexDirection: 'column',
+    },
+  },
+
+  control: {
+    '&:not(:first-of-type)': {
+      marginLeft: theme.spacing.md,
+    },
+
+    '@media (max-width: 520px)': {
+      height: 42,
+      fontSize: theme.fontSizes.md,
+
+      '&:not(:first-of-type)': {
+        marginTop: theme.spacing.md,
+        marginLeft: 0,
+      },
+    },
+  },
+}));
 
 export default function Hero() {
-  const router = useRouter()
-
-  const [walletAddress, setWalletAddress] = useState("")
-
-  const mintNft = async () => {
-    // const provider = new ethers.providers.Web3Provider(window.ethereum);
-    // const signer = provider.getSigner();
-
-    // const contract = new ethers.Contract(
-    //     "0xf0d755b10b0b1b5c96d00d84152385f9fd140739",
-    //     abi,
-    //     signer
-    // );
-
-    // await contract.safeMint(walletAddress)
-  }
+  const { classes } = useStyles();
+  const theme = useMantineTheme();
 
   return (
-    <>
-      <Head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
+    <Container className={classes.wrapper} size={1400}>
+      <Dots className={classes.dots} style={{ left: 0, top: 0 }} />
+      <Dots className={classes.dots} style={{ left: 60, top: 0 }} />
+      <Dots className={classes.dots} style={{ left: 0, top: 140 }} />
+      <Dots className={classes.dots} style={{ right: 0, top: 60 }} />
 
-      <Container maxW={'3xl'}>
-        <Stack
-          as={Box}
-          textAlign={'center'}
-          spacing={{ base: 8, md: 14 }}
-          py={{ base: 20, md: 36 }}>
-          <Heading
-            fontWeight={600}
-            fontSize={{ base: '2xl', sm: '4xl', md: '6xl' }}
-            lineHeight={'110%'}>
-            Buy event tickets <br />
-            <Text as={'span'} color={'teal.300'}>
-              using crypto
-            </Text>
-          </Heading>
-          <Text color={'gray.500'}>
-            Utilise NFT technology powered by the blockchain to buy tickets and attend your favourite events
+      <div className={classes.inner}>
+        <Title className={classes.title}>
+          Purchase tickets for{' '}
+          <Text component="span" color={theme.primaryColor} inherit>
+            Event X
+          </Text>{' '}
+          using crypto
+        </Title>
+
+        <Container p={0} size={600}>
+          <Text size="lg" color="dimmed" className={classes.description}>
+          Utilise NFT technology powered by the blockchain to buy tickets and attend Event X
           </Text>
-          <Stack
-            direction={'row'}
-            spacing={3}
-            align={'center'}
-            alignSelf={'center'}
-            position={'relative'}>
-            <Button
-              colorScheme={'teal'}
-              bg={'teal.400'}
-              px={6}
-              onClick={mintNft}
-              _hover={{
-                bg: 'teal.600',
-              }}>
-              Buy Ticket
-            </Button>
-            <Button
-              colorScheme={'teal'}
-              bg={'teal.400'}
-              px={6}
-              onClick={() => router.push('/nfts')}
-              _hover={{
-                bg: 'teal.600',
-                fontVariant: 'ghost'
-              }}>
-              Scan Tickets
-            </Button>
-            <Button
-              colorScheme={'teal'}
-              bg={'teal.400'}
-              px={6}
-              onClick={() => router.push('/logs')}
-              _hover={{
-                bg: 'teal.600',
-                fontVariant: 'ghost'
-              }}>
-              View Ticket Logs
-            </Button>
-            {/* <Button variant={'link'} colorScheme={'blue'} size={'sm'}>
-              Learn more
-            </Button> */}
-          </Stack>
-        </Stack>
-      </Container>
-    </>
+        </Container>
+
+        <div className={classes.controls}>
+          <Button className={classes.control} size="lg" variant="default" color="gray">
+            Purchase Tickets
+          </Button>
+          <Button className={classes.control} size="lg">
+            My Tickets
+          </Button>
+        </div>
+      </div>
+    </Container>
   );
 }
