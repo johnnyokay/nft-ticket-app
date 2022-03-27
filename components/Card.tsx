@@ -1,17 +1,11 @@
 import React, { useState } from "react";
-import { chakra, Box, Image, Flex, useColorModeValue, Button, useDisclosure, FormControl, FormLabel, Input } from "@chakra-ui/react";
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-} from '@chakra-ui/react'
+import { chakra, Image, Box, Flex, useColorModeValue, useDisclosure, FormControl, FormLabel, Input } from "@chakra-ui/react";
 import { ethers } from "ethers";
-
+import { useNotifications } from "@mantine/notifications";
+import { Modal, Button, Group } from '@mantine/core';
+import { CheckIcon } from '@radix-ui/react-icons'
 // Sample card from Airbnb
+
 
 const abi = [
   // ERC-721
@@ -19,8 +13,9 @@ const abi = [
 ]
 
 export default function Card(props: any) {
-  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [opened, setOpened] = useState(false);
   const [secretCode, setSecretCode] = useState("")
+  const notifications = useNotifications()
 
   const verifyNFT = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -32,7 +27,44 @@ export default function Card(props: any) {
         signer
     );
 
-    await contract.proveOwnership(props.tokenId, secretCode)
+    try {
+      notifications.showNotification({
+        title: 'Transaction Started',
+        message: 'Confirm the transaction to continue',
+      })
+  
+      const verifyTxn = await contract.proveOwnership(props.tokenId, secretCode)
+  
+      const id = notifications.showNotification({
+        title: 'Transaction Sent',
+        message: 'The transaction should be confirmed shortly',
+        loading: true,
+        autoClose: false,
+        disallowClose: true
+      })
+  
+      await verifyTxn.wait()
+  
+      setTimeout(() => {
+        notifications.updateNotification(id, {
+          id,
+          color: 'teal',
+          title: 'Transaction Confirmed!',
+          message:
+            'Notification will close in 2 seconds, you can close this notification now',
+          icon: <CheckIcon />,
+          autoClose: 2000,
+        });
+      }, 3000);
+    } catch (error) {
+      notifications.showNotification({
+        title: 'Error',
+        message: error.message,
+        color: 'red'
+      })
+    }
+
+    
   }
 
   return (
@@ -57,38 +89,29 @@ export default function Card(props: any) {
         
 
         <Box display='flex' mt='2' alignItems="self-end">
-          <Button onClick={onOpen}>View Ticket</Button>
+          <Button onClick={() => setOpened(true)}>View Ticket</Button>
         </Box>
       </Box>
     </Box>
 
     <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        isCentered
+        opened={opened}
+        onClose={() => setOpened(false)}
+        title="Introduce yourself!"
       >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Validate NFT</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody pb={2}>
-            
-            <chakra.p mb={4}>{"Token Id: " + props.tokenId}</chakra.p>
+       <chakra.p mb={4}>{"Token Id: " + props.tokenId}</chakra.p>
             <FormControl>
               <FormLabel>Secret Code</FormLabel>
               <Input value={secretCode} onChange={e => setSecretCode(e.target.value)} placeholder='Code' />
-            </FormControl>
+          </FormControl>
 
-          </ModalBody>
-
-          <ModalFooter>
-            <Button onClick={verifyNFT} colorScheme='blue' mr={3}>
+          <Button onClick={verifyNFT} mr={3}>
               Verify
             </Button>
-            <Button onClick={onClose}>Cancel</Button>
-          </ModalFooter>
-        </ModalContent>
+            <Button onClick={() => setOpened(false)}>Cancel</Button>
       </Modal>
+
+   
     </>
   )
 }

@@ -1,9 +1,37 @@
-import { chakra, Button, Box, Image, Flex, Heading, Input, useColorMode, useColorModeValue, Grid, GridItem, Text, Table, TableCaption, Thead, Tr, Th, Tbody, Td, Tfoot } from "@chakra-ui/react";
+import { chakra, Button, Box, Image, Flex, Heading, Input, useColorMode, useColorModeValue, Grid, GridItem, Text, Table, TableCaption, Thead, Tr, Th, Tbody, Td, Tfoot, Container } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
 import { useRouter } from 'next/router'
 import Navbar from "../components/Navbar";
 import Card from "../components/Card";
+import { createStyles, Title } from "@mantine/core";
+
+const useStyles = createStyles((theme) => ({
+  wrapper: {
+    paddingTop: 0,
+    paddingBottom: 0,
+  },
+
+  title: {
+    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+    fontWeight: 900,
+    marginBottom: theme.spacing.md,
+    textAlign: 'center',
+
+    [theme.fn.smallerThan('sm')]: {
+      fontSize: 28,
+      textAlign: 'left',
+    },
+  },
+
+  description: {
+    textAlign: 'center',
+
+    [theme.fn.smallerThan('sm')]: {
+      textAlign: 'left',
+    },
+  },
+}));
 
 const url = "https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2"
 
@@ -26,6 +54,7 @@ const abi = [
 ]
 
 const nfts = () => {
+  const { classes } = useStyles()
   const { toggleColorMode } = useColorMode()
   const formBackground = useColorModeValue("gray.100", "gray.700")
   const router = useRouter()
@@ -78,21 +107,13 @@ const nfts = () => {
     <div>
       <Navbar />
       <chakra.div mt="50" h="4.5rem" mx="auto" maxW="1200px">
-        <Flex justifyContent="center">
 
-      <Heading
-          mb={3}
-          mt={5}
-          fontSize={{ base: "4xl", md: "5xl" }}
-          color={useColorModeValue("gray.900", "gray.100")}
-          lineHeight="shorter"
-        >
-          View ticket&nbsp;
-          <Text as={'span'} color={'teal.300'}>
-            logs
+        <Title className={classes.title}>Event Logs</Title>
+
+        <Container size={560} p={0}>
+          <Text size="md" className={classes.description}>
           </Text>
-        </Heading>
-        </Flex>
+        </Container>
         <Table mt="50" variant='simple'>
           <Thead>
             <Tr>
