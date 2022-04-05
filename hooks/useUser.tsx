@@ -93,6 +93,8 @@ export const UserProvider = ({ children }: Props, { chains }: any) => {
                         providerOptions // required
                     })
 
+                    await web3Modal.clearCachedProvider()
+
                     const provider: any = await web3Modal.connect()
                     const lib: any = new ethers.providers.Web3Provider(window.ethereum, "any");
                     const addresses = await lib.listAccounts()

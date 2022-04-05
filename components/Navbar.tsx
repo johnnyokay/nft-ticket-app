@@ -10,11 +10,13 @@ import {
   Burger,
   Text,
   Tooltip,
-  Title
+  Title,
+  Box
 } from '@mantine/core';
 import { useBooleanToggle } from '@mantine/hooks';
 import { useUser } from '../hooks/useUser';
 import { useRouter } from 'next/router';
+import { flexbox } from '@chakra-ui/react';
 // import { ChevronDown } from 'tabler-icons-react';
 // import { MantineLogo } from '../../shared/MantineLogo';
 
@@ -34,6 +36,12 @@ const useStyles = createStyles((theme) => ({
     },
   },
 
+  nav: {
+    [theme.fn.largerThan('sm')]: {
+      display: 'none',
+    },
+  },
+
   burger: {
     [theme.fn.largerThan('sm')]: {
       display: 'none',
@@ -41,6 +49,7 @@ const useStyles = createStyles((theme) => ({
   },
 
   link: {
+    marginBottom: '5px',
     display: 'block',
     lineHeight: 1,
     padding: '8px 12px',
@@ -55,9 +64,20 @@ const useStyles = createStyles((theme) => ({
     },
   },
 
+  navbar: {
+    [theme.fn.largerThan("sm")]: {
+      display: "none"
+    }
+  },
+
   linkLabel: {
     marginRight: 5,
   },
+
+  wrap: {
+    display: "flex",
+    flexDirection: "column"
+  }
 }));
 
 const links = [
@@ -85,6 +105,93 @@ export default function Navbar() {
     );
   });
 
+  const NavbarContent = () => {
+    return (
+      <>
+      <Group hidden={!opened} spacing={5} className={classes.links}>
+            {items}
+          </Group>
+          <Group className={classes.links}>
+            {user.address !== "" && user.network == "maticmum" ? 
+            <Tooltip
+            transition="fade"
+            transitionDuration={200}
+            label="Connected to Mumbai Network"
+            withArrow
+          >
+            <Text size='md' >
+                Mumbai
+              </Text>
+          </Tooltip>
+              
+                :
+              null
+            //   <Tooltip
+            //   opened
+            //   label="Click to switch to Mumbai Network"
+            //   withArrow
+            // >
+            //   <Button variant="outline" size='sm' color='red' sx={{ height: 30 }} onClick={switchNetwork}>
+            //     Unsupported Network!
+            //   </Button>
+            // </Tooltip>
+            }
+            <Button size='md' sx={{ height: 35 }} onClick={connectWeb3Modal}>
+              {user.displayName !== "" ? 
+                user.displayName :
+                "Sign in"
+              }
+            </Button>
+          </Group>
+      </>
+    )
+  }
+
+  const MobileNavbar = () => {
+    return (
+      <>
+      <Container className={classes.wrap}>
+      <Box hidden={!opened}  className={classes.nav}>
+            {items}
+          </Box>
+          <Group hidden={!opened} className={classes.nav}>
+            {user.network == "maticmum" ? 
+            <Tooltip
+            transition="fade"
+            transitionDuration={200}
+            label="Connected to Mumbai Network"
+            withArrow
+          >
+            <Text size='md' >
+                Mumbai
+              </Text>
+          </Tooltip>
+              
+                :
+              null
+            //   <Tooltip
+            //   opened
+            //   label="Click to switch to Mumbai Network"
+            //   withArrow
+            // >
+            //   <Button variant="outline" size='sm' color='red' sx={{ height: 30 }} onClick={switchNetwork}>
+            //     Unsupported Network!
+            //   </Button>
+            // </Tooltip>
+            }
+            <Button size='md' sx={{ height: 35 }} onClick={connectWeb3Modal}>
+              {user.displayName !== "" ? 
+                user.displayName :
+                "Sign in"
+              }
+            </Button>
+          </Group>
+      </Container>
+      
+      </>
+    )
+  }
+
   return (
     <Header height={HEADER_HEIGHT} mb={120}>
       <Container size="xl" className={classes.inner}>
@@ -95,44 +202,15 @@ export default function Navbar() {
             className={classes.burger}
             size="sm"
           />
-          {/* <MantineLogo /> */}
-          <Title onClick={() => router.push('/')} order={3} >
+          
+          <Title onClick={() => router.push('/')} order={3} className={classes.links}>
             Event X
           </Title>
         </Group>
-        <Group spacing={5} className={classes.links}>
-          {items}
-        </Group>
-        <Group>
-          {user.network == "maticmum" ? 
-          <Tooltip
-          transition="fade"
-          transitionDuration={200}
-          label="Connected to Mumbai Network"
-          withArrow
-        >
-          <Text size='md' >
-              Mumbai
-            </Text>
-        </Tooltip>
-            
-              :
-            
-            <Tooltip
-            opened
-            label="Click to switch to Mumbai Network"
-            withArrow
-          >
-            <Button variant="outline" size='sm' color='red' sx={{ height: 30 }} onClick={switchNetwork}>
-              Unsupported Network!
-            </Button>
-          </Tooltip>
-          }
-          <Button size='md' sx={{ height: 35 }} onClick={connectWeb3Modal}>
-            {user.displayName}
-          </Button>
-        </Group>
+          <NavbarContent />
+        
       </Container>
+      <MobileNavbar />
     </Header>
   );
 }
