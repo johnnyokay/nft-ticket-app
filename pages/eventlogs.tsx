@@ -54,6 +54,8 @@ const abi = [
   "event OwnershipApprovalRequest(address ownerAddress, uint256 tokenId, uint16 secret)"
 ]
 
+const contractAddress = "0xF914c4b870036be96f0756E145c016b096058e96"
+
 const nfts = () => {
   const { classes } = useStyles()
   const { toggleColorMode } = useColorMode()
@@ -70,7 +72,7 @@ const nfts = () => {
       const signer = provider.getSigner();
 
       const contract = new ethers.Contract(
-        user.address,
+        contractAddress,
         abi,
         signer
       );
@@ -98,7 +100,7 @@ const nfts = () => {
 
         <Title className={classes.title}>Event Logs</Title>
 
-        <Container size={560} p={0}>
+        <Container p={0}>
           <Text size="md" className={classes.description}>
           </Text>
         </Container>
