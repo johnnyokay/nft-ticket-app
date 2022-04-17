@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import Navbar from "../components/Navbar";
 import Card from "../components/Card";
 import { createStyles, Title } from "@mantine/core";
+import { useUser } from "../hooks/useUser";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -61,46 +62,33 @@ const nfts = () => {
   
   const [walletAddress, setWalletAddress] = useState("")
   const [events, setEvents] = useState([])
+  const { user } = useUser()
 
   useEffect(() => {
-    // Client-side-only code
-    async function initWeb3() {
-      if (typeof window.ethereum !== "undefined" || (typeof window.web3 !== "undefined")) {
-        const provider = new ethers.providers.Web3Provider(window.ethereum,"any");
-        const signer = provider.getSigner();
+    const getEventLogs = async() => {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
 
-        try {
-          const addr = await signer.getAddress().then(async (a: string) => {
-            if (addr !== null) {
-              setWalletAddress(a)
+      const contract = new ethers.Contract(
+        user.address,
+        abi,
+        signer
+      );
 
-              const provider = new ethers.providers.Web3Provider(window.ethereum);
-              const signer = provider.getSigner();
+      contract.on("OwnershipApprovalRequest", (address, tokenId, secret) => {
+        console.log(`Address: ${address}, tokenId: ${tokenId}, secret: ${secret}`);
+      });
 
-              const contract = new ethers.Contract(
-                "0xf0d755b10b0b1b5c96d00d84152385f9fd140739",
-                abi,
-                signer
-              );
+      let eventFilter = contract.filters.OwnershipApprovalRequest()
+      let blockNumber = await provider.getBlockNumber()
+      let events: any = await contract.queryFilter(eventFilter, blockNumber-3000, blockNumber)
 
-              contract.on("OwnershipApprovalRequest", (address, tokenId, secret) => {
-                console.log(`Address: ${address}, tokenId: ${tokenId}, secret: ${secret}`);
-              });
-
-              let eventFilter = contract.filters.OwnershipApprovalRequest()
-              let blockNumber = await provider.getBlockNumber()
-              let events: any = await contract.queryFilter(eventFilter, blockNumber-3000, blockNumber)
-
-              console.log(events)
-              setEvents(events)
-            }
-          })
-        } catch(error) {
-          console.log(error)
-        }
-      }
+      setEvents(events)
     }
-    initWeb3();
+
+    if (user.address) {
+      getEventLogs();
+    }
   }, [])
 
   return (
