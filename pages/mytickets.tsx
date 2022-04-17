@@ -76,55 +76,32 @@ const mytickets = () => {
 
   useEffect(() => {
       const getNFTs = async() => {
-          const ownerAddr = "0x7220E0C548A73985BfB1057091755759889A53F4";
           const nfts = await web3.alchemy.getNfts({
-            owner: ownerAddr,
+            owner: user.address,
             contractAddresses: [ contractAddress ],
-            withMetadata: false
+            withMetadata: true
           })
-
-          const provider = new ethers.providers.Web3Provider(window.ethereum,"any");
           
-          const smartContract = new ethers.Contract(contractAddress, abi, provider)
-          const fetches = []
           let modifiedData: any = []
           for (const nft of nfts.ownedNfts) {
             const tokenID = parseInt(nft.id.tokenId, 16)
+            const image = `https://ipfs.io/ipfs/${nft.metadata?.image?.substring(5)}`
 
-            fetches.push(
-              smartContract.tokenURI(tokenID)
-                .then((res: any) => fetch(res))
-                .then((res: any) => res.json())
-                .then((res: any) => {
-                  if (res.image.substring(0, 7) === "ipfs://") {
-                    //res.image = `https://ipfs.io/ipfs/${res.image.substring(5)}`
-                    res.image = `https://ipfs.io/ipfs/QmPtUx44pEg6KtorBrcjNxJYwx7S1nY7NPoCpmLUXxcBts`
-                  }
-                  
-                    console.log(res)
-
-                    modifiedData.push({
-                      contractAddress: contractAddress,
-                      tokenName: res.name,
-                      tokenID: tokenID,
-                      name: res.name,
-                      image: res.image
-                    })
-                })
-            )
+            modifiedData.push({
+              contractAddress: contractAddress,
+              tokenID: tokenID,
+              name: nft.metadata?.name,
+              image: image,
+            })
           }
 
-          await Promise.allSettled(fetches).then(() => {
-            setNFTs(modifiedData)
-            console.log(modifiedData)
-          }).catch((err) => {
-            console.log(err)
-          })
-
+          setNFTs(modifiedData)
       }
 
-      getNFTs();
-  }, [])
+      if (user.address) {
+        getNFTs();
+      }
+  }, [user])
 
   return (
     <>

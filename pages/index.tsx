@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar'
 import { useEffect, useState } from "react";
 import { ethers } from 'ethers'
 import Hero from '../components/Hero'
+import { ColorModeScript } from '@chakra-ui/react'
 
 const Home: NextPage = () => {
   return (

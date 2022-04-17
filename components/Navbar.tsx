@@ -108,7 +108,7 @@ export default function Navbar() {
   const NavbarContent = () => {
     return (
       <>
-      <Group hidden={!opened} spacing={5} className={classes.links}>
+      <Group hidden={opened} spacing={5} className={classes.links}>
             {items}
           </Group>
           <Group className={classes.links}>
@@ -125,16 +125,15 @@ export default function Navbar() {
           </Tooltip>
               
                 :
-              null
-            //   <Tooltip
-            //   opened
-            //   label="Click to switch to Mumbai Network"
-            //   withArrow
-            // >
-            //   <Button variant="outline" size='sm' color='red' sx={{ height: 30 }} onClick={switchNetwork}>
-            //     Unsupported Network!
-            //   </Button>
-            // </Tooltip>
+              <Tooltip
+              opened
+              label="Click to switch to Mumbai Network"
+              withArrow
+            >
+              <Button variant="outline" size='sm' color='red' sx={{ height: 30 }} onClick={switchNetwork}>
+                Unsupported Network!
+              </Button>
+            </Tooltip>
             }
             <Button size='md' sx={{ height: 35 }} onClick={connectWeb3Modal}>
               {user.displayName !== "" ? 

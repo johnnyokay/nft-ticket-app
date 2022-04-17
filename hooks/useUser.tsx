@@ -50,16 +50,6 @@ const providerOptions = {
     }
    };
 
-export async function getStaticProps() {
-   const chains = await import('./chains.json');
-
-   return {
-       props: {
-           chains
-       }
-   }
-}
-
 export const UserProvider = ({ children }: Props, { chains }: any) => {
     console.log(chains)
     const [user, setUser] = useState<User>({
@@ -68,17 +58,7 @@ export const UserProvider = ({ children }: Props, { chains }: any) => {
         network: ""
     })
 
-    const [chainInfo, setChainInfo] = useState<any>();
-
-    
-
     const [provider, setProvider] = useState<Provider>();
-    const [library, setLibrary] = useState<ethers.providers.Web3Provider>();
-    const [account, setAccount] = useState();
-    const [signature, setSignature] = useState("");
-    const [error, setError] = useState("");
-    const [chainId, setChainId] = useState<Number>();
-    const [network, setNetwork] = useState();
 
     useEffect(() => {
         //detect if already connected
@@ -93,7 +73,7 @@ export const UserProvider = ({ children }: Props, { chains }: any) => {
                         providerOptions // required
                     })
 
-                    await web3Modal.clearCachedProvider()
+                    //await web3Modal.clearCachedProvider()
 
                     const provider: any = await web3Modal.connect()
                     const lib: any = new ethers.providers.Web3Provider(window.ethereum, "any");
@@ -128,7 +108,7 @@ export const UserProvider = ({ children }: Props, { chains }: any) => {
             }
 
             const handleDisconnect = () => {
-                console.log("disconnect", error)
+                console.log("disconnect")
                 disconnect();
             }
 
@@ -158,8 +138,8 @@ export const UserProvider = ({ children }: Props, { chains }: any) => {
             const library = new ethers.providers.Web3Provider(provider)
             setProvider(provider)
             updateUser(library)
-            } catch (error) {
-                console.error(error);
+        } catch (error) {
+            console.error(error);
         }
       };
 
@@ -167,7 +147,7 @@ export const UserProvider = ({ children }: Props, { chains }: any) => {
         try {
             await window.ethereum.request({
             method: "wallet_switchEthereumChain",
-            params: [{ chainId: (80001).toString(16) }]
+            params: [{ chainId: "0x13881" }]
             });
         } catch (err) {
           if (err.code === 4902) {
@@ -193,7 +173,7 @@ export const UserProvider = ({ children }: Props, { chains }: any) => {
                 }]
               });
             } catch (error) {
-              setError(error);
+              console.log(error.message)
             }
           }
         }
@@ -227,8 +207,6 @@ export const UserProvider = ({ children }: Props, { chains }: any) => {
         let network = await provider.getNetwork()
         console.log("network : " + network.name)
         
-
-        //setLibrary(provider)
         setUser({
             address: address,
             displayName: displayName,
