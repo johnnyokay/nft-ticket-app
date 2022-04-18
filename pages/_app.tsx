@@ -1,18 +1,25 @@
-import type { AppProps } from 'next/app'
-import { ChakraProvider } from '@chakra-ui/react'
-import { NotificationsProvider } from '@mantine/notifications';
-import { UserProvider } from '../hooks/useUser'
+import type { AppProps } from "next/app";
+import { MantineProvider } from "@mantine/core";
+import { NotificationsProvider } from "@mantine/notifications";
+import { UserProvider } from "../hooks/useUser";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return (
-    <ChakraProvider>
-      <NotificationsProvider>
-        <UserProvider>
-          <Component {...pageProps} />
-        </UserProvider>
-      </NotificationsProvider>
-    </ChakraProvider>
-  )
+	return (
+		<MantineProvider
+			withGlobalStyles
+			withNormalizeCSS
+			theme={{
+				/** Put your mantine theme override here */
+				colorScheme: "light",
+			}}
+		>
+			<NotificationsProvider>
+				<UserProvider>
+					<Component {...pageProps} />
+				</UserProvider>
+			</NotificationsProvider>
+		</MantineProvider>
+	);
 }
 
-export default MyApp
+export default MyApp;

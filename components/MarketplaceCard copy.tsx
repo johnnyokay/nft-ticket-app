@@ -1,19 +1,20 @@
 import React, { useState } from "react";
+import {
+	chakra,
+	Image,
+	Box,
+	Flex,
+	useColorModeValue,
+	useDisclosure,
+	FormControl,
+	FormLabel,
+	Input,
+} from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { useNotifications } from "@mantine/notifications";
+import { Modal, Button, Group } from "@mantine/core";
 import { CheckIcon } from "@radix-ui/react-icons";
 import marketplaceabi from "../hooks/marketplaceABI.json";
-import {
-	Modal,
-	Button,
-	Group,
-	Card,
-	Image,
-	Text,
-	TextInput,
-	Divider,
-} from "@mantine/core";
-import maticLogo from "../utils/polylogo.png";
 // Sample card from Airbnb
 
 const abi = [
@@ -24,7 +25,7 @@ const abi = [
 
 const marketplaceContract = "0x4578340d62906f2F2a92844Dd6832eA035131eb7";
 
-export default function MarketplaceCard(props: any) {
+export default function Card(props: any) {
 	const notifications = useNotifications();
 
 	const purchaseNFT = async (tokenId: number) => {
@@ -53,7 +54,7 @@ export default function MarketplaceCard(props: any) {
 			const verifyTxn = await contract.purchaseNFT(
 				props.walletAddress,
 				tokenId,
-				{ value: props.price }
+				{ value: 1 }
 			);
 
 			const id = notifications.showNotification({
@@ -88,46 +89,49 @@ export default function MarketplaceCard(props: any) {
 
 	return (
 		<>
-			<Card withBorder radius="md" shadow="sm">
-				<Card.Section>
-					<Image
-						src={
-							"https://ipfs.io/ipfs/QmPtUx44pEg6KtorBrcjNxJYwx7S1nY7NPoCpmLUXxcBts"
-						}
-						alt={props.tokenId}
-					/>
-				</Card.Section>
+			<Box
+				maxW="sm"
+				shadow="md"
+				borderWidth="1px"
+				borderRadius="lg"
+				overflow="hidden"
+			>
+				<Image
+					src={
+						"https://ipfs.io/ipfs/QmPtUx44pEg6KtorBrcjNxJYwx7S1nY7NPoCpmLUXxcBts"
+					}
+					alt={props.tokenId}
+				/>
 
-				<Card.Section>
-					<Text
-						size="xl"
-						weight={500}
-						style={{
-							marginLeft: 15,
-							marginTop: 10,
-						}}
+				<Box p="4">
+					<Box
+						mt="0"
+						fontWeight="semibold"
+						fontSize="22"
+						as="h3"
+						lineHeight="tight"
+						isTruncated
 					>
-						NFT Ticket #{props.tokenId}
-					</Text>
-				</Card.Section>
-
-				<Divider my="md" />
-
-				<Group mt={10} grow={true}>
-					<Group>
-						<Image></Image>
-						<Text size="lg">{props.price.toString()} MATIC</Text>
-					</Group>
-					<Button
-						onClick={() => purchaseNFT(props.itemId)}
-						variant="filled"
-						color="blue"
-						fullWidth
+						{props.tokenId}
+					</Box>
+					<Box
+						mt="0"
+						fontWeight="semibold"
+						fontSize="22"
+						as="h3"
+						lineHeight="tight"
+						isTruncated
 					>
-						Purchase
-					</Button>
-				</Group>
-			</Card>
+						{props.price.toString()}
+					</Box>
+
+					<Box display="flex" mt="2" alignItems="self-end">
+						<Button onClick={() => purchaseNFT(props.tokenId)}>
+							Purchase Ticket
+						</Button>
+					</Box>
+				</Box>
+			</Box>
 		</>
 	);
 }

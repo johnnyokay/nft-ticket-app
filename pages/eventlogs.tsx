@@ -1,132 +1,129 @@
-import { chakra, Button, Box, Image, Flex, Heading, Input, useColorMode, useColorModeValue, Grid, GridItem, Text, Table, TableCaption, Thead, Tr, Th, Tbody, Td, Tfoot, Container } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { useEffect, useState } from "react";
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import Card from "../components/Card";
-import { createStyles, Title } from "@mantine/core";
+import { Container, createStyles, Table, Title } from "@mantine/core";
 import { useUser } from "../hooks/useUser";
 
 const useStyles = createStyles((theme) => ({
-  wrapper: {
-    paddingTop: 0,
-    paddingBottom: 0,
-  },
+	wrapper: {
+		paddingTop: 0,
+		paddingBottom: 0,
+	},
 
-  title: {
-    fontFamily: `Greycliff CF, ${theme.fontFamily}`,
-    fontWeight: 900,
-    marginBottom: theme.spacing.md,
-    textAlign: 'center',
+	title: {
+		fontFamily: `Greycliff CF, ${theme.fontFamily}`,
+		fontWeight: 900,
+		marginBottom: theme.spacing.md,
+		textAlign: "center",
 
-    [theme.fn.smallerThan('sm')]: {
-      fontSize: 28,
-      textAlign: 'left',
-    },
-  },
+		[theme.fn.smallerThan("sm")]: {
+			fontSize: 28,
+			textAlign: "left",
+		},
+	},
 
-  description: {
-    textAlign: 'center',
+	description: {
+		textAlign: "center",
 
-    [theme.fn.smallerThan('sm')]: {
-      textAlign: 'left',
-    },
-  },
+		[theme.fn.smallerThan("sm")]: {
+			textAlign: "left",
+		},
+	},
 }));
 
-const url = "https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2"
+const url =
+	"https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2";
 
 var requestOptions = {
-  method: 'GET',
-  redirect: 'follow'
+	method: "GET",
+	redirect: "follow",
 };
 
-const api = "HUCC73V8581MMZD9WSZN682PXJGD19B6H1"
+const api = "HUCC73V8581MMZD9WSZN682PXJGD19B6H1";
 
-const provider = new ethers.providers.JsonRpcProvider(url)
+const provider = new ethers.providers.JsonRpcProvider(url);
 
 const abi = [
-  // ERC-721
-  "function tokenURI(uint256 _tokenId) external view returns (string)",
-  "function ownerOf(uint256 _tokenId) external view returns (address)",
-  // ERC-1155
-  "function uri(uint256 _id) external view returns (string)",
-  "event OwnershipApprovalRequest(address ownerAddress, uint256 tokenId, uint16 secret)"
-]
+	// ERC-721
+	"function tokenURI(uint256 _tokenId) external view returns (string)",
+	"function ownerOf(uint256 _tokenId) external view returns (address)",
+	// ERC-1155
+	"function uri(uint256 _id) external view returns (string)",
+	"event OwnershipApprovalRequest(address ownerAddress, uint256 tokenId, uint16 secret)",
+];
 
-const contractAddress = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260"
+const contractAddress = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260";
 
 const nfts = () => {
-  const { classes } = useStyles()
-  const { toggleColorMode } = useColorMode()
-  const formBackground = useColorModeValue("gray.100", "gray.700")
-  const router = useRouter()
-  
-  const [walletAddress, setWalletAddress] = useState("")
-  const [events, setEvents] = useState([])
-  const { user } = useUser()
+	const { classes } = useStyles();
+	const router = useRouter();
 
-  useEffect(() => {
-    const getEventLogs = async() => {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
+	const [walletAddress, setWalletAddress] = useState("");
+	const [events, setEvents] = useState([]);
+	const { user } = useUser();
 
-      const contract = new ethers.Contract(
-        contractAddress,
-        abi,
-        signer
-      );
+	useEffect(() => {
+		const getEventLogs = async () => {
+			const provider = new ethers.providers.Web3Provider(window.ethereum);
+			const signer = provider.getSigner();
 
-      contract.on("OwnershipApprovalRequest", (address, tokenId, secret) => {
-        console.log(`Address: ${address}, tokenId: ${tokenId}, secret: ${secret}`);
-      });
+			const contract = new ethers.Contract(contractAddress, abi, signer);
 
-      let eventFilter = contract.filters.OwnershipApprovalRequest()
-      let blockNumber = await provider.getBlockNumber()
-      let events: any = await contract.queryFilter(eventFilter, blockNumber-3000, blockNumber)
+			contract.on(
+				"OwnershipApprovalRequest",
+				(address, tokenId, secret) => {
+					console.log(
+						`Address: ${address}, tokenId: ${tokenId}, secret: ${secret}`
+					);
+				}
+			);
 
-      setEvents(events)
-    }
+			let eventFilter = contract.filters.OwnershipApprovalRequest();
+			let blockNumber = await provider.getBlockNumber();
+			let events: any = await contract.queryFilter(
+				eventFilter,
+				blockNumber - 3000,
+				blockNumber
+			);
 
-    if (user.address) {
-      getEventLogs();
-    }
-  }, [])
+			setEvents(events);
+		};
 
-  return (
-    <div>
-      <Navbar />
-      <chakra.div mt="50" h="4.5rem" mx="auto" maxW="1200px">
+		if (user.address) {
+			getEventLogs();
+		}
+	}, []);
 
-        <Title className={classes.title}>Event Logs</Title>
+	return (
+		<div>
+			<Navbar />
 
-        <Container p={0}>
-          <Text size="md" className={classes.description}>
-          </Text>
-        </Container>
-        <Table mt="50" variant='simple'>
-          <Thead>
-            <Tr>
-              <Th>Address</Th>
-              <Th>Token Id</Th>
-              <Th >Secret Code</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-          {events.map((nft: any, idx) => 
-              <Tr>
-                <Td>{nft.args.ownerAddress}</Td>
-                <Td>{nft.args.tokenId._hex}</Td>
-                <Td>{nft.args.secret}</Td>
-              </Tr>  
-          )}
+			<Title className={classes.title}>Event Logs</Title>
 
-          </Tbody>
-        </Table>
-      </chakra.div>
-        
-    </div>
-  )
-}
+			<Container mt={50}>
+				<Table>
+					<thead>
+						<tr>
+							<th>Address</th>
+							<th>Token Id</th>
+							<th>Secret Code</th>
+						</tr>
+					</thead>
+					<tbody>
+						{events.map((nft: any, idx) => (
+							<tr>
+								<td>{nft.args.ownerAddress}</td>
+								<td>{nft.args.tokenId._hex}</td>
+								<td>{nft.args.secret}</td>
+							</tr>
+						))}
+					</tbody>
+				</Table>
+			</Container>
+		</div>
+	);
+};
 
-export default nfts
+export default nfts;
