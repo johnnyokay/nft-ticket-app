@@ -14,6 +14,8 @@ import {
   useMantineTheme,
   createStyles,
 } from '@mantine/core';
+import marketplaceabi from "../hooks/marketplaceABI.json"
+import MarketplaceCard from "../components/MarketplaceCard";
 
 const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -51,14 +53,12 @@ var requestOptions: RequestInit = {
   },
 };
 
-const baseURL = "https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2"
-
-const contractAddr = "0xf0d755b10b0b1b5c96d00d84152385f9fd140739";
 
 const abi = [
   // ERC-721
   "function tokenURI(uint256 _tokenId) external view returns (string)",
   "function ownerOf(uint256 _tokenId) external view returns (address)",
+  "function fetchMarketItems() public view",
   // ERC-1155
   "function uri(uint256 _id) external view returns (string)",
 ]
@@ -67,39 +67,51 @@ const web3 = createAlchemyWeb3(
   `https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2`,
 );
 
-const contractAddress = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260"
+const provider = new ethers.providers.JsonRpcProvider("https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2")
 
-const mytickets = () => {
+const contractAddress = "0x4578340d62906f2F2a92844Dd6832eA035131eb7"
+
+const marketplace = () => {
   const { classes } = useStyles();
   const { user } = useUser()
   const [nfts, setNFTs] = useState([])
 
   useEffect(() => {
-      const getNFTs = async() => {
-          const nfts = await web3.alchemy.getNfts({
-            owner: user.address,
-            contractAddresses: [ contractAddress ],
-            withMetadata: true
+      const getListedNFTs = async() => {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        
+        try {
+          const contract = new ethers.Contract(
+            contractAddress,
+            marketplaceabi,
+            signer
+        );
+
+          const data = await contract.fetchMarketItems()
+          const items = data.map(i => {
+            let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
+            let item = {
+              price: i.price,
+              tokenId: i.tokenId.toNumber(),
+              seller: i.seller,
+              owner: i.owner,
+            }
+            return item;
           })
-          
-          let modifiedData: any = []
-          for (const nft of nfts.ownedNfts) {
-            const tokenID = parseInt(nft.id.tokenId, 16)
-            const image = `https://ipfs.io/ipfs/${nft.metadata?.image?.substring(5)}`
 
-            modifiedData.push({
-              contractAddress: contractAddress,
-              tokenID: tokenID,
-              name: nft.metadata?.name,
-              image: image,
-            })
-          }
+          setNFTs(items)
 
-          setNFTs(modifiedData)
+          console.log("hello")
+          console.log(data)
+        } catch(error) {
+          console.log(error.message)
+        }
+        
       }
 
       if (user.address) {
-        getNFTs();
+        getListedNFTs();
       }
   }, [user])
 
@@ -107,11 +119,11 @@ const mytickets = () => {
     <>
     <Navbar />
     <Container className={classes.wrapper}>
-      <Title className={classes.title}>My Tickets</Title>
+      <Title className={classes.title}>Purchase NFTs</Title>
 
       <Container size={560} p={0}>
         <Text size="md" className={classes.description}>
-          Click a ticket to scan it for entry
+          Browse NFTs to purchase
         </Text>
       </Container>
 
@@ -125,7 +137,7 @@ const mytickets = () => {
         ]}
       >
         {nfts.map((nft: any, idx) => 
-                  <Card name={nft.name} image={nft.image} tokenId={nft.tokenID} contractAddress={nft.contractAddress} walletAddress={user.address} />
+                  <MarketplaceCard tokenId={nft.tokenId} price={nft.price} walletAddress={user.address} />
               )}
       </SimpleGrid>
     </Container>
@@ -133,4 +145,4 @@ const mytickets = () => {
   )
 }
 
-export default mytickets
+export default marketplace

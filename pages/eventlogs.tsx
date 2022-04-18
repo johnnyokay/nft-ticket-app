@@ -54,7 +54,7 @@ const abi = [
   "event OwnershipApprovalRequest(address ownerAddress, uint256 tokenId, uint16 secret)"
 ]
 
-const contractAddress = "0xF914c4b870036be96f0756E145c016b096058e96"
+const contractAddress = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260"
 
 const nfts = () => {
   const { classes } = useStyles()

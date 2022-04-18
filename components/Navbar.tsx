@@ -84,6 +84,7 @@ const links = [
   {"link": "buytickets", "label": "Buy Tickets"},
   {"link": "mytickets", "label": "My Tickets"},
   {"link": "eventlogs", "label": "Event logs"},
+  {"link": "marketplace", "label": "Marketplace"},
 ]
 
 export default function Navbar() {

@@ -79,7 +79,7 @@ var requestOptions: RequestInit = {
 
 const baseURL = "https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2"
 
-const contractAddr = "0xf0d755b10b0b1b5c96d00d84152385f9fd140739";
+const contractAddr = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260";
 
 const abi = [
   // ERC-721
@@ -94,7 +94,7 @@ const web3 = createAlchemyWeb3(
   `https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2`,
 );
 
-const contractAddress = "0xF914c4b870036be96f0756E145c016b096058e96"
+const contractAddress = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260"
 
 const buytickets = () => {
   const { user } = useUser();
