@@ -5,6 +5,9 @@ import Navbar from "../components/Navbar";
 import Card from "../components/Card";
 import { useUser } from "../hooks/useUser";
 import { createAlchemyWeb3 } from "@alch/alchemy-web3";
+import { useNotifications } from "@mantine/notifications";
+
+import { CheckIcon } from '@radix-ui/react-icons'
 import {
   ThemeIcon,
   Text,
@@ -76,12 +79,13 @@ var requestOptions: RequestInit = {
 
 const baseURL = "https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2"
 
-const contractAddr = "0xf0d755b10b0b1b5c96d00d84152385f9fd140739";
+const contractAddr = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260";
 
 const abi = [
   // ERC-721
   "function tokenURI(uint256 _tokenId) external view returns (string)",
   "function ownerOf(uint256 _tokenId) external view returns (address)",
+  "function safeMint(address to)",
   // ERC-1155
   "function uri(uint256 _id) external view returns (string)",
 ]
@@ -90,64 +94,64 @@ const web3 = createAlchemyWeb3(
   `https://polygon-mumbai.g.alchemy.com/v2/9JVEvfELVUoW5aucKY_yWaRzZjfWsiA2`,
 );
 
-const contractAddress = "0xf0d755b10b0b1b5c96d00d84152385f9fd140739"
+const contractAddress = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260"
 
-const mytickets = () => {
+const buytickets = () => {
+  const { user } = useUser();
   const { classes } = useStyles();
-  const { user } = useUser()
   const [nfts, setNFTs] = useState([])
+  const notifications = useNotifications()
 
-  useEffect(() => {
-      const getNFTs = async() => {
-          const ownerAddr = "0x7220E0C548A73985BfB1057091755759889A53F4";
-          const nfts = await web3.alchemy.getNfts({
-            owner: ownerAddr,
-            contractAddresses: [ contractAddress ],
-            withMetadata: false
-          })
+  const purchaseNFT = async () => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
 
-          const provider = new ethers.providers.Web3Provider(window.ethereum,"any");
-          
-          const smartContract = new ethers.Contract(contractAddress, abi, provider)
-          const fetches = []
-          let modifiedData: any = []
-          for (const nft of nfts.ownedNfts) {
-            const tokenID = parseInt(nft.id.tokenId, 16)
+    const contract = new ethers.Contract(
+        contractAddress,
+        abi,
+        signer
+    );
 
-            fetches.push(
-              smartContract.tokenURI(tokenID)
-                .then((res: any) => fetch(res))
-                .then((res: any) => res.json())
-                .then((res: any) => {
-                  if (res.image.substring(0, 7) === "ipfs://") {
-                    //res.image = `https://ipfs.io/ipfs/${res.image.substring(5)}`
-                    res.image = `https://ipfs.io/ipfs/QmPtUx44pEg6KtorBrcjNxJYwx7S1nY7NPoCpmLUXxcBts`
-                  }
-                  
-                    console.log(res)
+    try {
+      notifications.showNotification({
+        title: 'Transaction Started',
+        message: 'Confirm the transaction to continue',
+      })
+  
+      console.log(user.address)
+      const verifyTxn = await contract.safeMint(user.address)
+  
+      const id = notifications.showNotification({
+        title: 'Transaction Sent',
+        message: 'The transaction should be confirmed shortly',
+        loading: true,
+        autoClose: false,
+        disallowClose: true
+      })
+  
+      await verifyTxn.wait()
+  
+      setTimeout(() => {
+        notifications.updateNotification(id, {
+          id,
+          color: 'teal',
+          title: 'Transaction Confirmed!',
+          message:
+            'Notification will close in 2 seconds, you can close this notification now',
+          icon: <CheckIcon />,
+          autoClose: 2000,
+        });
+      }, 3000);
+    } catch (error) {
+      notifications.showNotification({
+        title: 'Error',
+        message: error.message,
+        color: 'red'
+      })
+    }
 
-                    modifiedData.push({
-                      contractAddress: contractAddress,
-                      tokenName: res.name,
-                      tokenID: tokenID,
-                      name: res.name,
-                      image: res.image
-                    })
-                })
-            )
-          }
-
-          await Promise.allSettled(fetches).then(() => {
-            setNFTs(modifiedData)
-            console.log(modifiedData)
-          }).catch((err) => {
-            console.log(err)
-          })
-
-      }
-
-      getNFTs();
-  }, [])
+    
+  }
 
   return (
     <>
@@ -183,7 +187,7 @@ const mytickets = () => {
        <Title ml="xl" order={1} color="white" className={classes.title}>
             Event X Ticket
         </Title>     
-        <Button size="xl">
+        <Button onClick={() => purchaseNFT()} size="xl">
           Purchase Ticket
         </Button>
         
@@ -194,4 +198,4 @@ const mytickets = () => {
   )
 }
 
-export default mytickets
+export default buytickets
