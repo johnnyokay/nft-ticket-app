@@ -3,8 +3,17 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Navbar from "../components/Navbar";
 import Card from "../components/Card";
-import { Container, createStyles, Table, Title } from "@mantine/core";
+import {
+	ActionIcon,
+	Button,
+	Container,
+	createStyles,
+	Group,
+	Table,
+	Title,
+} from "@mantine/core";
 import { useUser } from "../hooks/useUser";
+import { Check, AlertCircle, Ban } from "tabler-icons-react";
 
 const useStyles = createStyles((theme) => ({
 	wrapper: {
@@ -56,6 +65,29 @@ const abi = [
 
 const contractAddress = "0xcAa7Cfdd22C401Db2adDAE7dC7a7CbD7fb84B260";
 
+enum Verified {
+	NotChecked,
+	Verified,
+	Invalid,
+}
+
+type verifiedInterface = {
+	[key in Verified]: string;
+};
+
+const verifiedColors: verifiedInterface = {
+	[Verified.Verified]: "rgba(17, 255, 0, 0.3)",
+	[Verified.Invalid]: "rgba(255, 0, 0, 0.3)",
+	[Verified.NotChecked]: "",
+};
+
+type Event = {
+	ownerAddress: string;
+	tokenId: number;
+	secret: number;
+	verified: Verified;
+};
+
 const nfts = () => {
 	const { classes } = useStyles();
 	const router = useRouter();
@@ -82,19 +114,53 @@ const nfts = () => {
 
 			let eventFilter = contract.filters.OwnershipApprovalRequest();
 			let blockNumber = await provider.getBlockNumber();
-			let events: any = await contract.queryFilter(
+			let data: any = await contract.queryFilter(
 				eventFilter,
 				blockNumber - 3000,
 				blockNumber
 			);
 
+			const events = data.map((i: any) => {
+				const tokenIdNumber = parseInt(i.args.tokenId, 16);
+				let event: Event = {
+					ownerAddress: i.args.ownerAddress,
+					tokenId: tokenIdNumber,
+					secret: i.args.secret,
+					verified: Verified.NotChecked,
+				};
+				return event;
+			});
+
 			setEvents(events);
+
+			console.log(events);
 		};
 
 		if (user.address) {
 			getEventLogs();
 		}
 	}, []);
+
+	const verifyEvent = (idx: any) => {
+		let newEvents = [...events];
+		let event: Event = newEvents[idx];
+		event.verified = Verified.Verified;
+		setEvents(newEvents);
+	};
+
+	const invalidateEvent = (idx: any) => {
+		let newEvents = [...events];
+		let event: Event = newEvents[idx];
+		event.verified = Verified.Invalid;
+		setEvents(newEvents);
+	};
+
+	const uncheckEvent = (idx: any) => {
+		let newEvents = [...events];
+		let event: Event = newEvents[idx];
+		event.verified = Verified.NotChecked;
+		setEvents(newEvents);
+	};
 
 	return (
 		<div>
@@ -112,12 +178,36 @@ const nfts = () => {
 						</tr>
 					</thead>
 					<tbody>
-						{events.map((nft: any, idx) => (
-							<tr>
-								<td>{nft.args.ownerAddress}</td>
-								<td>{nft.args.tokenId._hex}</td>
-								<td>{nft.args.secret}</td>
-							</tr>
+						{events.map((nft: Event, idx) => (
+							<>
+								<tr
+									style={{
+										backgroundColor:
+											verifiedColors[nft.verified],
+									}}
+								>
+									<td>{nft.ownerAddress}</td>
+									<td>{nft.tokenId}</td>
+									<td>{nft.secret}</td>
+									<Group>
+										<ActionIcon
+											onClick={() => verifyEvent(idx)}
+										>
+											<Check color="green" />
+										</ActionIcon>
+										<ActionIcon
+											onClick={() => invalidateEvent(idx)}
+										>
+											<AlertCircle color="red" />
+										</ActionIcon>
+										<ActionIcon
+											onClick={() => uncheckEvent(idx)}
+										>
+											<Ban />
+										</ActionIcon>
+									</Group>
+								</tr>
+							</>
 						))}
 					</tbody>
 				</Table>

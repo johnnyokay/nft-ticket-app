@@ -90,6 +90,18 @@ export default function MarketplaceCard(props: any) {
 		<>
 			<Card withBorder radius="md" shadow="sm">
 				<Card.Section>
+					<Text
+						size="xs"
+						color="gray"
+						style={{
+							margin: 10,
+						}}
+					>
+						Seller: {props.seller}
+					</Text>
+				</Card.Section>
+
+				<Card.Section>
 					<Image
 						src={
 							"https://ipfs.io/ipfs/QmPtUx44pEg6KtorBrcjNxJYwx7S1nY7NPoCpmLUXxcBts"
