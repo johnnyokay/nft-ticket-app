@@ -90,7 +90,7 @@ const marketplace = () => {
 				);
 
 				const data = await contract.fetchMarketItems();
-				const items = data.map((i) => {
+				const items = data.map((i: any) => {
 					let price = ethers.utils.formatUnits(
 						i.price.toString(),
 						"ether"
@@ -145,6 +145,7 @@ const marketplace = () => {
 							itemId={nft.itemId}
 							tokenId={nft.tokenId}
 							price={nft.price}
+							seller={nft.seller}
 							walletAddress={user.address}
 						/>
 					))}
