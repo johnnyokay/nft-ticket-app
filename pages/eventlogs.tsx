@@ -158,21 +158,22 @@ const nfts = () => {
 
 	const verifyEvent = (idx: any) => {
 		let newEvents = [...events];
-		let event: Event = newEvents[idx];
+		console.log(newEvents.length - 1 - idx);
+		let event: Event = newEvents[newEvents.length - 1 - idx];
 		event.verified = Verified.Verified;
 		setEvents(newEvents);
 	};
 
 	const invalidateEvent = (idx: any) => {
 		let newEvents = [...events];
-		let event: Event = newEvents[idx];
+		let event: Event = newEvents[newEvents.length - 1 - idx];
 		event.verified = Verified.Invalid;
 		setEvents(newEvents);
 	};
 
 	const uncheckEvent = (idx: any) => {
 		let newEvents = [...events];
-		let event: Event = newEvents[idx];
+		let event: Event = newEvents[newEvents.length - 1 - idx];
 		event.verified = Verified.NotChecked;
 		setEvents(newEvents);
 	};
