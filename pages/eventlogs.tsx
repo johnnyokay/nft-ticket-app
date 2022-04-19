@@ -93,24 +93,17 @@ const nfts = () => {
 	const router = useRouter();
 
 	const [walletAddress, setWalletAddress] = useState("");
-	const [events, setEvents] = useState([]);
+	const [events, setEvents] = useState<Event[]>([]);
 	const { user } = useUser();
 
 	useEffect(() => {
+		let contract: ethers.Contract;
+
 		const getEventLogs = async () => {
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
 			const signer = provider.getSigner();
 
-			const contract = new ethers.Contract(contractAddress, abi, signer);
-
-			contract.on(
-				"OwnershipApprovalRequest",
-				(address, tokenId, secret) => {
-					console.log(
-						`Address: ${address}, tokenId: ${tokenId}, secret: ${secret}`
-					);
-				}
-			);
+			contract = new ethers.Contract(contractAddress, abi, signer);
 
 			let eventFilter = contract.filters.OwnershipApprovalRequest();
 			let blockNumber = await provider.getBlockNumber();
@@ -133,12 +126,34 @@ const nfts = () => {
 
 			setEvents(events);
 
-			console.log(events);
+			contract.on(
+				"OwnershipApprovalRequest",
+				(address, tokenId, secret) => {
+					const tokenIdNumber = parseInt(tokenId, 16);
+					let event: Event = {
+						ownerAddress: address,
+						tokenId: tokenIdNumber,
+						secret: secret,
+						verified: Verified.NotChecked,
+					};
+
+					console.log(events);
+					console.log(...events);
+					let newEvents: Event[] = [...events, event];
+					setEvents(newEvents);
+				}
+			);
 		};
 
 		if (user.address) {
 			getEventLogs();
 		}
+
+		return () => {
+			if (contract) {
+				contract.removeAllListeners("OwnershipApprovalRequest");
+			}
+		};
 	}, []);
 
 	const verifyEvent = (idx: any) => {
@@ -178,37 +193,44 @@ const nfts = () => {
 						</tr>
 					</thead>
 					<tbody>
-						{events.map((nft: Event, idx) => (
-							<>
-								<tr
-									style={{
-										backgroundColor:
-											verifiedColors[nft.verified],
-									}}
-								>
-									<td>{nft.ownerAddress}</td>
-									<td>{nft.tokenId}</td>
-									<td>{nft.secret}</td>
-									<Group>
-										<ActionIcon
-											onClick={() => verifyEvent(idx)}
-										>
-											<Check color="green" />
-										</ActionIcon>
-										<ActionIcon
-											onClick={() => invalidateEvent(idx)}
-										>
-											<AlertCircle color="red" />
-										</ActionIcon>
-										<ActionIcon
-											onClick={() => uncheckEvent(idx)}
-										>
-											<Ban />
-										</ActionIcon>
-									</Group>
-								</tr>
-							</>
-						))}
+						{events
+							.slice(0)
+							.reverse()
+							.map((nft: Event, idx) => (
+								<>
+									<tr
+										style={{
+											backgroundColor:
+												verifiedColors[nft.verified],
+										}}
+									>
+										<td>{nft.ownerAddress}</td>
+										<td>{nft.tokenId}</td>
+										<td>{nft.secret}</td>
+										<Group>
+											<ActionIcon
+												onClick={() => verifyEvent(idx)}
+											>
+												<Check color="green" />
+											</ActionIcon>
+											<ActionIcon
+												onClick={() =>
+													invalidateEvent(idx)
+												}
+											>
+												<AlertCircle color="red" />
+											</ActionIcon>
+											<ActionIcon
+												onClick={() =>
+													uncheckEvent(idx)
+												}
+											>
+												<Ban />
+											</ActionIcon>
+										</Group>
+									</tr>
+								</>
+							))}
 					</tbody>
 				</Table>
 			</Container>
